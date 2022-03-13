@@ -1,0 +1,30 @@
+.blueContainer {
+    background-color: rgb(37, 93, 165);
+    border-radius: 50px;
+    min-height: 300px;    
+}
+
+.imagenMarca {
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    padding: 0;
+    max-width: 350px;
+}
+
+.imagenVendedor {
+    border-radius: 40px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+    padding: 0;
+    max-width: 250px;
+}
+
+.contenedorContacto {
+    background-image: url("/assets/img/texturaMadera.jpeg");
+}
+
+.alerta {
+    width: 80%;
+}
+
+.btnDetalle {
+    max-width: 200px;
+}

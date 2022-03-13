@@ -39,7 +39,7 @@ class CoursesPage extends React.Component {
                     image: 'assets/img/dartCourse1.png',
                     courseName: "Dart the full course",
                     courseColor: 'rgb(35, 25, 105)',
-                    professor: "freeCodeCamp.org",
+                    professor: "free",
                     professorColor: "rgb(75, 135, 25)",
                     backgroundColor: "rgb(235, 235, 235)",
                     buttonText: "More info",
