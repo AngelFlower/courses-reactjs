@@ -22,7 +22,7 @@ class CourseCard extends React.Component {
                     <div className="card-body">
                         <h5 className="card-title" style={{ color: courseColor }}>{courseName}</h5>
                         <p className="card-text" style={{ color: professorColor }}>Professor: {professor}</p>
-                        <a href={buttonLink} target="_blank" rel="noreferrer" className={`btn ${buttonColor}`}>{buttonText}</a>
+                        <a href={buttonLink} target="_blank" rel="noopener noreferrer" className={`btn ${buttonColor}`}>{buttonText}</a>
                     </div>
                     <div class="card-footer">
                     {
