@@ -56,7 +56,7 @@ class GradesPage extends React.Component {
     }
 
 
-    async calculateScholarship() {
+    calculateScholarship() {
         const { regularStudent, noScholarships, period, monthlyIncome, studentName } = this.state;
         var scholarship = 'No Scholarship'
 
@@ -151,7 +151,10 @@ class GradesPage extends React.Component {
                                 <button type="button" className="btn btn-primary" name="scholarshipForm" value={+this.state.scholarshipForm + 1} onClick={this.handleInputChange}>Scholarship Form</button>
                             </form>
                         </div>
-                        <div className={this.state.scholarshipForm % 2 == true ? "col-md-6" : "col-md-6 d-none"}>
+                        
+                        <div className={
+                            // eslint-disable-next-line 
+                            this.state.scholarshipForm % 2 == true ? "col-md-6" : "col-md-6 d-none"}>
                     
                             <p className="h3">
                                 Scholarship

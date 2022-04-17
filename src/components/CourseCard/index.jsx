@@ -24,7 +24,7 @@ class CourseCard extends React.Component {
                         <p className="card-text" style={{ color: professorColor }}>Professor: {professor}</p>
                         <a href={buttonLink} target="_blank" rel="noopener noreferrer" className={`btn ${buttonColor}`}>{buttonText}</a>
                     </div>
-                    <div class="card-footer">
+                    <div className="card-footer">
                     {
                         starsImages(stars)
                     }
