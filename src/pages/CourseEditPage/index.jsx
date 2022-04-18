@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useAlert } from 'react-alert'
+import { fetchCourse, updateCourse, fetchProfessors, fetchLanguages } from '../../services/CourseService'
 import TitlePage from '../../components/TitlePage'
 
 const CourseEditPage = () => {
@@ -8,71 +10,82 @@ const CourseEditPage = () => {
 
 	const {type, id} = useParams()
 
-    const [course, setCourse] = useState([]) 
+    const [course, setCourse] = useState({
+        image: ''
+    }) 
+    	
     const [professors, setProfessors] = useState([]) 
     const [languages, setLanguages] = useState([])
+    const [errors, setErrors] = useState([])
+
+    const alert = useAlert()
+
+    const validText = new RegExp('^[a-zA-Z0-9]+$')
+    const validHexColor = new RegExp('^#(?:[0-9a-fA-F]{3}){1,2}$')
+    //eslint-disable-next-line
+   	const validURL = new RegExp('^https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,}$')
 
   	const handleChange = (event) => {
+  		const name = event.target.name
+  		const value = event.target.value
+
     	setCourse({
     		...course,
-    		[event.target.name]:event.target.value
+    		[name]:event.target.value
     	})
+
+    	console.log(event.target.value)
+
+  		switch (name) {
+  			case 'name':
+  			case 'buttonText':
+  				handleErrors(validText, name, value, 'The text is invalid. Only accept text and numbers')
+  				break
+  			case 'courseColor':
+  			case 'professorColor':
+  			case 'backgroundColor':
+  				handleErrors(validHexColor, name, value, 'Color must be hexadecimal')
+  				break
+  			case 'buttonLink':
+  			case 'image':
+  				handleErrors(validURL, name, value, 'invalid URL. Must be a valid URL like http://example.com/test')
+  				break
+  			default:
+  		}
+
+	}
+
+	const handleErrors = (condition, name, value, errorMessage) => {
+		if(!condition.test(value)) {
+			console.log('errrooor')
+  			setErrors({
+  				...errors,
+  				[name]: errorMessage	
+  			})
+  		}
+  		else {
+  			let newErrors = errors
+  			delete newErrors[name]
+  			setErrors(newErrors)
+  		}
 	}
 
 	 const handleSubmit = (event) => {
     	event.preventDefault()
-    	updateCourse()
+    	updateCourse({course, id, alert})
     	console.log(course)
 	}
 
-	const fetchCourse = () => {
-		fetch(`http://127.0.0.1:8000/api/courses/${id}`)
-			.then(response => response.json())
-        	.then(data => {
-        		setCourse(data)
-        	})
-			.then(error => console.log(error))
-	}
-
-	const updateCourse = () => {
-		fetch(`http://127.0.0.1:8000/api/courses/${id}`, {
-			method: 'PUT',
-			body: JSON.stringify(course),
-			headers: {
-      			'Content-Type': 'application/json'
-    		},
-		})
-			.then(response => response.json())
-        	.then(data => {
-        		console.log('ok')
-        		setCourse(data)
-        	})
-			.then(error => console.log(error))
-	}
-
-	const fetchProfessors = () => {
-		fetch('http://127.0.0.1:8000/api/professors')
-			.then(response => response.json())
-        	.then(data => setProfessors(data))
-			.then(error => console.log(error))
-	}
-
-	const fetchLanguages = () => {
-		fetch('http://127.0.0.1:8000/api/languages')
-			.then(response => response.json())
-        	.then(data => setLanguages(data))
-			.then(error => console.log(error))
-	}
-
     useEffect(() => {
-    	fetchCourse()
+    	fetchCourse({setCourse, id})
     	if(type !== 'details'){
-    		fetchProfessors()
-    		fetchLanguages()
+    		fetchProfessors({setProfessors})
+    		fetchLanguages({setLanguages})
     	}
     }, [])
 
     const isReadOnly = type === 'details' ? true : false
+    const isCreate = type === 'create' ? true : false
 
 	return(
 		<div>
@@ -81,49 +94,53 @@ const CourseEditPage = () => {
 			<form onSubmit={handleSubmit}>
 				<div className="row">
 					<div className="col-lg-5">
-						<img src={course.image} alt={course.name} style={{width: '100%'}}/>
-						<label className="mt-2 w-100">
+						<img src={course.image} alt={course.name} className={`mb-2 ${Object.keys(course.image).length == 0  && 'd-none'}`} style={{width: '100%'}}/>
+						<label className="w-100">
 							Url image
-							<input type="text" className="form-control" placeholder="Image from URL" name="image" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.image} />
+							<input type="text" className={`form-control ${errors.hasOwnProperty('image') && 'is-invalid'}`} placeholder="Image from URL" name="image" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.image} />
+							<div className="invalid-feedback">
+								{errors.image}
+							</div>
 						</label>
 					</div>
 					<div className="col-lg-7">
 						<div className="mb-2">
 							<label className="w-100">
 								Name
-								<input type="text" className="form-control" placeholder="Name course" name="name" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.name}/>
+								<input type="text" className={`form-control ${errors.hasOwnProperty('name') && 'is-invalid'}`} placeholder="Name course" name="name" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.name}/>
+								<div className="invalid-feedback">
+							        {errors.name}
+							    </div>
 							</label>
 						</div>
 						<div className="mb-2 w-100">
 							<label style={{width: '50%'}}>
 								Professor
-								<select className="form-select" name="professor_id" onChange={handleChange}>
-									<option defaultValue value={course.professor_id}>{course.professor}</option>
+								<select className="form-select" name="professor_id" value={course.professor_id} onChange={handleChange}>
 									{
-										type === 'details' ?
-										''
-										:(
+										type === 'edit' || type === 'create' ? (
 											professors.map((professor, index) => (
 												<option key={index} value={professor.id}>{professor.name}</option>
 												)
 											)
 										)
-									}
+										:
+										<option value={course.professor_id}>{course.professor}</option>
 									}
 								</select>
 							</label>
 							<label style={{width: '50%'}}>
 								Language
-								<select className="form-select" name="language_id" onChange={handleChange}>
-									<option defaultValue value={course.language_id}>{course.language}</option>
+								<select className="form-select" name="language_id" value={course.language_id} onChange={handleChange}>
 									{
-										type === 'edit' && (
+										type === 'edit' || type === 'create' ? (
 											languages.map((language, index) => (
 												<option key={index} value={language.id}>{language.name}</option>
 												)
 											)
 										)
-									}
+										:
+										<option value={course.language_id}>{course.language}</option>
 									}
 								</select>
 							</label>
@@ -131,25 +148,50 @@ const CourseEditPage = () => {
 						<div className="mb-2 d-flex">
 							<label className="flex-fill">
 								Course color
-								<input type="text" className="form-control" placeholder="Course Color" name="courseColor" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.courseColor}/>
+								<input type="text" className={`form-control ${errors.hasOwnProperty('courseColor') && 'is-invalid'}`}placeholder="Course Color" name="courseColor" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.courseColor}/>
+								<div className="invalid-feedback">
+							        {errors.courseColor}
+							    </div>
 							</label>
 							<label className="flex-fill">
 								Professor color
-								<input type="text" className="form-control" placeholder="Professor Color" name="professorColor" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.professorColor}/>
+								<input type="text" className={`form-control ${errors.hasOwnProperty('professorColor') && 'is-invalid'}`} placeholder="Professor Color" name="professorColor" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.professorColor}/>
+								<div className="invalid-feedback">
+							        {errors.professorColor}
+							    </div>
 							</label>
 							<label className="flex-fill">
 								Background color
-								<input type="text" className="form-control" placeholder="Background Color" name="backgroundColor" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.backgroundColor}/>
+								<input type="text" className={`form-control ${errors.hasOwnProperty('backgroundColor') && 'is-invalid'}`} placeholder="Background Color" name="backgroundColor" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.backgroundColor}/>
+								<div className="invalid-feedback">
+							        {errors.backgroundColor}
+							    </div>
 							</label>
 						</div>																	
 						<div className="mb-2 d-flex">
 							<label className="flex-fill">
 								Button color
-								<input type="text" className="form-control" placeholder="Button color" name="buttonColor" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.buttonColor}/>
+								<select className="form-select" name="buttonColor" value={course.buttonColor} onChange={handleChange}>
+									{
+										type === 'edit' ? (
+											<>
+												<option value={'btn-primary'}>{'btn-primary'}</option>
+												<option value={'btn-secondary'}>{'btn-secondary'}</option>
+												<option value={'btn-success'}>{'btn-success'}</option>
+												<option value={'btn-danger'}>{'btn-danger'}</option>
+											</>
+										)
+										:
+										<option value={course.buttonColor}>{course.buttonColor}</option>
+									}
+								</select>
 							</label>
 							<label className="flex-fill">
 								Button text
-								<input type="text" className="form-control" placeholder="Button text" name="buttonText" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.buttonText}/>
+								<input type="text" className={`form-control ${errors.hasOwnProperty('buttonText') && 'is-invalid'}`} placeholder="Button text" name="buttonText" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.buttonText}/>
+								<div className="invalid-feedback">
+							        {errors.buttonText}
+							    </div>
 							</label>
 							<label className="ms-3 flex-fill">
 								Shadow
@@ -192,11 +234,17 @@ const CourseEditPage = () => {
 						<div className="mb-2 d-flex">
 							<label style={{width:'10%'}}>
 								Stars
-								<input type="number" className="form-control" placeholder="Stars" name="stars" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.stars}/>
+								<input type="number" className={`form-control ${errors.hasOwnProperty('stars') && 'is-invalid'}`} placeholder="Stars" name="stars" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.stars}/>
+								<div className="invalid-feedback">
+							        {errors.stars}
+							    </div>
 							</label>
 							<label className="flex-fill">
 								Button link
-								<input type="text" className="form-control" placeholder="Button link" name="buttonLink" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.buttonLink}/>
+								<input type="text" className={`form-control ${errors.hasOwnProperty('buttonLink') && 'is-invalid'}`} placeholder="Button link" name="buttonLink" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.buttonLink}/>
+								<div className="invalid-feedback">
+							        {errors.buttonLink}
+							    </div>
 							</label>
 						</div>
 						<div className="mt-3">

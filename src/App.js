@@ -20,6 +20,7 @@ function App() {
           {/*><Route path="courses" element={<CoursesPage />} />*/}
           <Route path="courses" element={<CourseIndexPage />} />
           <Route exact path="course/:type/:id" element={<CourseEditPage />} />
+          <Route exact path="course/:type/" element={<CourseEditPage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="grades" element={<GradesPage />} />
           <Route path="*" element={<NoMatch/>} />`

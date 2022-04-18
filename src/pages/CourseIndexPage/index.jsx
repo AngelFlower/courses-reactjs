@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import { useAlert } from 'react-alert'
 import TitlePage from "../../components/TitlePage"
 
 const CoursesIndexPage = () => {
 
 	const [courses, setCourses] = useState([])
 	const [fetchError = false, setFetchError] = useState([])
-
+	const alert = useAlert()
 
 	const fetchCourses = () => {
 		fetch("http://127.0.0.1:8000/api/courses/")
@@ -31,12 +32,6 @@ const CoursesIndexPage = () => {
 	    		case "create":
 	    			console.log("create")
 	    			break
-	    		case "details":
-	    			console.log("details")
-	    			break
-	    		case "edit":
-	    			console.log("edit")
-	    			break
 	    		case "delete":
 	    			console.log("delete")
 	    			deleteCourse(id)
@@ -57,12 +52,14 @@ const CoursesIndexPage = () => {
 	    			console.log(data.status)
 	    			if(data.status === 204){
 	    				let newCourses = courses.filter(function(course){ return course.id !== +id })
+	    				alert.show('Course deleted successfully')
 	    				setCourses(newCourses)
 	    			}
-	    			status = data.status})
 	    }
-    	status === 204 ? alert("Deleted") : console.log('ok')
+	    )
     }
+}
+    
 
 	return (
 		<div>
@@ -78,9 +75,9 @@ const CoursesIndexPage = () => {
 				      <th scope="col">Professor</th>
 				      <th scope="col">Language</th>
 				      <th scope="col">
-				      	<button type="button" className="btn btn-primary w-100" name="create" onClick={handleButtons}>
-					    	Create
-					    </button>
+				      	<Link to = {`/course/create`} className="btn btn-primary w-100">
+							Create
+						</Link>
 				      </th>
 				    </tr>
 				  </thead>
