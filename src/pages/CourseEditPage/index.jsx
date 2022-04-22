@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAlert } from 'react-alert'
-import { fetchCourse, updateCourse, fetchProfessors, fetchLanguages } from '../../services/CourseService'
+import { fetchCourse, updateCourse, createCourse, fetchProfessors, fetchLanguages } from '../../services/CourseService'
 import TitlePage from '../../components/TitlePage'
 
 const CourseEditPage = () => {
@@ -70,14 +70,64 @@ const CourseEditPage = () => {
   		}
 	}
 
-	 const handleSubmit = (event) => {
+	// validate form if is null
+	const validateForm = () => {
+		let errorsF = {}
+		if(course.name === '') {
+			errorsF.name = 'Name is required'
+		}
+		if(course.buttonText === '') {
+			errorsF.buttonText = 'Button text is required'
+		}
+		if(course.courseColor === '') {
+			errorsF.courseColor = 'Course color is required'
+		}
+		if(course.professorColor === '') {
+			errorsF.professorColor = 'Professor color is required'
+		}
+		if(course.backgroundColor === '') {
+			errorsF.backgroundColor = 'Background color is required'
+		}
+		if(course.buttonLink === '') {
+			errorsF.buttonLink = 'Button link is required'
+		}
+		if(course.image === '') {
+			errorsF.image = 'Image is required'
+		}
+		setErrors({
+			...errors,
+			...errorsF
+		})
+
+		return Object.keys(errorsF).length === 0
+	}
+
+	 const handleSubmit =  async (event) => {
     	event.preventDefault()
-    	updateCourse({course, id, alert})
+		console.log(errors)
+		if(Object.keys(errors).length === 0 && validateForm()) {
+			switch(type) {
+				case "edit": updateCourse({course, id, alert})
+					break
+				case "create": createCourse({course, alert})
+					break
+				default:
+					break
+			}
+		}
+		else {
+			alert.error('Please fill all the fields correctly')
+		}
+		
+
+
     	console.log(course)
 	}
 
     useEffect(() => {
-    	fetchCourse({setCourse, id})
+		if(type === 'edit' || type === 'details') {
+			fetchCourse({setCourse, id})
+		}
     	if(type !== 'details'){
     		fetchProfessors({setProfessors})
     		fetchLanguages({setLanguages})
@@ -85,7 +135,7 @@ const CourseEditPage = () => {
     }, [])
 
     const isReadOnly = type === 'details' ? true : false
-    const isCreate = type === 'create' ? true : false
+    // const isCreate = type === 'create' ? true : false
 
 	return(
 		<div>
@@ -94,7 +144,7 @@ const CourseEditPage = () => {
 			<form onSubmit={handleSubmit}>
 				<div className="row">
 					<div className="col-lg-5">
-						<img src={course.image} alt={course.name} className={`mb-2 ${Object.keys(course.image).length == 0  && 'd-none'}`} style={{width: '100%'}}/>
+						<img src={course.image} alt={course.name} className={`mb-2 ${Object.keys(course.image).length === 0  && 'd-none'}`} style={{width: '100%'}}/>
 						<label className="w-100">
 							Url image
 							<input type="text" className={`form-control ${errors.hasOwnProperty('image') && 'is-invalid'}`} placeholder="Image from URL" name="image" onChange={handleChange} readOnly={isReadOnly} defaultValue={course.image} />
@@ -173,7 +223,7 @@ const CourseEditPage = () => {
 								Button color
 								<select className="form-select" name="buttonColor" value={course.buttonColor} onChange={handleChange}>
 									{
-										type === 'edit' ? (
+										type === 'edit' || type === 'create' ? (
 											<>
 												<option value={'btn-primary'}>{'btn-primary'}</option>
 												<option value={'btn-secondary'}>{'btn-secondary'}</option>
@@ -217,7 +267,7 @@ const CourseEditPage = () => {
 								          id="radio-item-2"
 								          name="shadow"
 								          type="radio"
-								          value=""
+								          value="null"
 								          className="form-check-input"
 								          onChange={handleChange}
 								          disabled={isReadOnly}
@@ -249,7 +299,7 @@ const CourseEditPage = () => {
 						</div>
 						<div className="mt-3">
 							<button className="btn btn-dark" onClick={() => navigate('/courses')}>Go back</button>
-							{type === 'edit' ? <button type="submit" className="btn btn-primary mx-2">Save</button> : '' }
+							{type !== 'details' ? <button type="submit" className="btn btn-primary mx-2">Save</button> : '' }
 						</div>
 					</div>
 				</div>

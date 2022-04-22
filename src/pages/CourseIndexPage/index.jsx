@@ -43,7 +43,7 @@ const CoursesIndexPage = () => {
     }
 
     const deleteCourse = (id) => {
-    	let status = 404
+    	//let status = 404
     	if(window.confirm('Are you sure you wish to delete this course?')) {
 	    	fetch(`http://127.0.0.1:8000/api/courses/${id}`, {
 	    		method: "DELETE"
